@@ -149,8 +149,53 @@ def stats
 	puts "\t\t\t\t\tYear..........#{maxes("year")}"
 	puts "\t\t\t\t\tDecade........#{most_decade}"
 
-	get_back
+	puts "For top authors(A); top languages(L); top countries(C); top subjects(S); top decades(D)"
+	option = gets.chomp
+	if option == "a" || option == "A"
+		top_5("author")
+	elsif option == "l" || option == "L"
+		top_5("language")
+	elsif option == "c" || option == "C"
+		top_5("country")
+	elsif option == "s" || option == "S"
+		top_5("subject")
+	elsif option == "d" || option == "D"
+		puts "option not available yet"
+		end
+
+	puts "To go home, enter H"
+	puts "To get more stats, use any other key"
+	key = gets.chomp
+	if key == "h" || key == "H"
+		homescreen
+	else
+		stats
+	end
 end
+
+def top_5(field)
+	result = Array.new
+	top5 = Array.new
+
+	$db.execute("SELECT #{field} FROM books").each do |b|
+		result.push("#{b["#{field}"]}")
+	end
+
+	5.times do
+		freq = result.inject(Hash.new(0)) {|h,v| h[v] += 1; h}
+		ans = result.max_by {|v| freq[v]}
+		top5.push("#{ans} (#{freq[ans]})")
+		result.delete(ans)
+	end
+
+	i = 0
+	while i < top5.length
+		puts top5[i]
+		i +=1
+	end
+
+end
+
 
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 #                                           #
