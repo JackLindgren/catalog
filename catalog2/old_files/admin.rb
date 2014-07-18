@@ -49,11 +49,7 @@ def add_book
 
 	$db.execute("INSERT INTO books (title, author, country, language, subject, year) VALUES (?, ?, ?, ?, ?, ?)", title, author, country, language, subject, year)
 
-	puts "\n\n\t\t\t\t\tTo return to the home screen, hit any kiss and press enter"
-	print "\n\n\t\t\t\t\t"
-	key = gets.chomp
-	key.scan(/./)
-		homescreen
+	get_back
 end
 
 def homescreen
@@ -62,8 +58,11 @@ def homescreen
 	puts "\n\n\t\t\t\t\te = enter a book"
 	puts "\n\n\t\t\t\t\ts = setup the database"
 	puts "\n\n\t\t\t\t\tu = update a record"
+	puts "\n\n\t\t\t\t\td = delete a record"
 	puts "\n\n\t\t\t\t\tf = update a field"
 	puts "\n\n\t\t\t\t\tv = view all records"
+	puts "\n\n\t\t\t\t\ti = view some stats"
+	puts "\n\n\t\t\t\t\tp = import a file"
 	puts "\n\n\t\t\t\t\tq = quit"
 	print "\n\n\t\t\t\t\t"	
 	choice = gets.chomp
@@ -74,12 +73,18 @@ def homescreen
 		create_table
 	elsif choice == "u" || choice == "U"
 		update
+	elsif choice == "d" || choice == "D"
+		delete_record
 	elsif choice == "v" || choice == "V"
 		view_all
 	elsif choice == "f" || choice == "F"
 		edit_field
+	elsif choice == "p" || choice == "P"
+		import
 	elsif choice == "q" || choice == "Q"
 		disconnect
+	elsif choice == "i" || choice == "I"
+		stats
 	else
 		homescreen
 	end
@@ -88,89 +93,133 @@ end
 def view_all
 	puts "\e[H\e[2J"
 
-# assigns everything to an array and prints that
 	all_books = Array.new
 	$db.execute("SELECT * FROM books").each do |n|
 		book = n
-		all_books.push("\t%-25s %-40s %-6s %-15s %-15s %-20s %-4s" % [book['author'], book['title'], book['year'], book['country'], book['language'], book['subject'], book['id']])
+		all_books.push("\t%-30s %-45s %-6s %-15s %-15s %-20s %-4s" % [book['author'][0..28], book['title'][0..42], book['year'], book['country'], book['language'], book['subject'], book['id']])
 	end
 
 	all_books.sort!
 
-	puts "\t\t%-25s %-40s %-6s %-15s %-15s %-20s %-4s" % ["Author", "Title", "Year", "Country", "Language", "Subject", "ID \#"]
-	puts "\n"
-
-#	i = 0
-#	while i < all_books.length
-#		puts "\t#{i+1}  #{all_books[i]}"
-#		i += 1
-#	end
-
 	i = 0
-	j = 0
 	k = 15
 	while i <= all_books.length
 		puts"\e[H\e[2J"
-		puts "\t\t%-25s %-40s %-6s %-15s %-15s %-20s %-4s" % ["Author", "Title", "Year", "Country", "Language", "Subject", "ID \#"]
+		puts "\t\t%-30s %-45s %-6s %-15s %-15s %-20s" % ["Author", "Title", "Year", "Country", "Language", "Subject"]
 		puts "\n"
-		while i >= j && i < k
-			puts "\t#{i+1}  #{all_books[i]}"
+		while i >= 0  && i < k
+			puts "\t#{i+1}  #{all_books[i][0..133]}"
 			i += 1
 		end
-		puts "press enter"
+		puts "press 'F' to move forward 'B' to move back and 'q' to go home"
 		key = gets.chomp
-		key.scan(/./)
+		if key == "f" || key == "F" || key == ""
 			k += 15
+		elsif key == "b" || key == "B"
+			i = i - 30
+			k = k - 15
+		elsif key == "q" || key == "Q"
+			homescreen
+		end
 	end
-
-# the record ID number is in line[-4..-2].to_i, for getting a match
-
-	puts "\n\n\t\t\t\t\tTo retrun home, press enter"
-	choice = gets.chomp
-	choice.scan (/./)
-		homescreen
+	get_back
 end
 
 def update
-
 	puts "\e[H\e[2J"
 
 	all_books = Array.new
 	$db.execute("SELECT * FROM books").each do |n|
 		book = n
-		all_books.push("\t%-25s %-40s %-6s %-15s %-15s %-20s %-4s" % [book['author'], book['title'], book['year'], book['country'], book['language'], book['subject'], book['id']])
+		all_books.push("\t%-30s %-45s %-4s %-15s %-15s %-20s %-4s" % [book['author'][0..28], book['title'][0..42], book['year'], book['country'], book['language'], book['subject'], book['id']])
 	end
 
 	all_books.sort!
 
-	puts "\t\t%-25s %-40s %-6s %-15s %-15s %-20s %-4s" % ["Author", "Title", "Year", "Country", "Language", "Subject", "ID \#"]
-	puts "\n"
-
 	i = 0
-	j = 0
 	k = 15
-	while i <= all_books.length
+	while i <= all_books.length && k <= all_books.length + 15
 		puts"\e[H\e[2J"
-		puts "\t\t%-25s %-40s %-6s %-15s %-15s %-20s %-4s" % ["Author", "Title", "Year", "Country", "Language", "Subject", "ID \#"]
+		puts "\t\t%-30s %-45s %-4s %-15s %-15s %-20s" % ["Author", "Title", "Year", "Country", "Language", "Subject"]
 		puts "\n"
-		while i >= j && i < k
-			puts "\t#{i+1}  #{all_books[i]}"
+		while i >= 0 && i < k
+			puts "\t#{i+1}  #{all_books[i][0..133]}" #so that it won't display the record ID number, but it will remain accessible
 			i += 1
 		end
-		puts "Enter a record number and press ENTER to access that book. Otherwise, press ENTER"
-		key = gets.chomp.to_i
-		if key > 0
-			call_record(key)
-			edit_record(key)
+		puts "Enter a record number and press ENTER to access that book"
+		puts "ENTER or 'F' to move forward, 'B' to move backward, or 'Q' to quit"
+		key = gets.chomp
+		if key.to_i > 0
+			call_record(all_books[key.to_i - 1][-4..-1].to_i)
+			edit_record(all_books[key.to_i - 1][-4..-1].to_i)
 			break
-		elsif key == 0
+		elsif key == "" || key == "f" || key == "F"
 			k += 15
+		elsif key == "b" || key == "B"
+			i = i - 30
+			k = k - 15
+		elsif key == "q" || key == "Q"
+			homescreen
 		end
 	end
-	puts "To return home, press enter"
-	thing = gets.chomp
-	thing.scan(/./)
-		homescreen
+	get_back
+end
+
+def delete_record
+	puts "\e[H\e[2J"
+
+	all_books = Array.new
+	$db.execute("SELECT * FROM books").each do |n|
+		book = n
+		all_books.push("\t%-30s %-45s %-4s %-15s %-15s %-20s %-4s" % [book['author'][0..28], book['title'][0..42], book['year'], book['country'], book['language'], book['subject'], book['id']])
+	end
+
+	all_books.sort!
+
+	i = 0
+	k = 15
+	while i < all_books.length
+                puts"\e[H\e[2J"
+                puts "\t\t%-30s %-45s %-6s %-15s %-15s %-20s" % ["Author", "Title", "Year", "Country", "Language", "Subject"]
+                puts "\n"
+                while i >= 0  && i < k
+			puts "\t#{i+1}  #{all_books[i][0..133]}" #so that it won't display the record ID number, but it will remain accessible
+			i += 1
+		end
+		puts "Enter a record number and press ENTER to access that book"
+		puts "ENTER or 'F' to move forward, 'B' to move backward, or 'Q' to quit"
+		key = gets.chomp
+		if key.to_i > 0
+			call_record(all_books[key.to_i - 1][-4..-1].to_i)
+			puts "Are you SURE you want to delete this record? (y/n)"
+			sure = gets.chomp
+			if sure == "y" || sure == "Y"
+				puts "the record for this book will be permanently deleted from the database."
+				puts "continue? (y/n)"
+				positive = gets.chomp
+				if positive == "y" || positive == "Y"
+					$db.execute("DELETE FROM books WHERE id = ?", "#{all_books[key.to_i - 1][-4..-1].to_i}")
+	#puts "record number: #{all_books[key.to_i - 1][-4..-1].to_i}"
+					puts "record deleted"
+					get_back
+				else
+					get_back
+				end
+			else
+				get_back
+			end
+			#break
+		elsif key == "" || key == "f" || key == "F"
+			k += 15
+		elsif key == "b" || key == "B"
+			i = i - 30
+			k = k - 15
+		elsif key == "q" || key == "Q"
+			homescreen
+		end
+	end
+	get_back
+
 
 end
 
@@ -179,48 +228,75 @@ def edit_record(id_num)
 
 	puts "Enter the new title (or leave blank)"
 	title = gets.chomp
-	if title != ""
-		$db.execute("UPDATE books SET title = ? WHERE id = ?", title, id_num)
+
+	work = $db.execute("SELECT * FROM books WHERE id = ?", id_num).first
+
+	if title == ""
+		title = work['title']
 	end
 
 	puts "Enter the new author (or leave blank)"
 	auth = gets.chomp
-	if auth != ""
-		$db.execute("UPDATE books SET author = ? WHERE id = ?", auth, id_num)
+	if auth == ""
+		auth = work['author']
 	end
 
 	puts "Enter the new language (or leave blank)"
 	language = gets.chomp
-	if language != ""
-		$db.execute("UPDATE books SET language = ? WHERE id = ?", language, id_num)
+	if language == ""
+		language = work['language']
 	end
 
 	puts "Enter the new country (or leave blank)"
 	country = gets.chomp
-	if country != ""
-		$db.execute("UPDATE books SET country = ? WHERE id = ?", country, id_num)
+	if country == ""
+		country = work['country']
 	end
 
 	puts "Enter the new subject (or leave blank)"
 	subject = gets.chomp
-	if subject != ""
-		$db.execute("UPDATE books SET subject = ? WHERE id = ?", subject, id_num)
+	if subject == ""
+		subject = work['subject']
 	end
 
 	puts "Enter the new year (or leave blank)"
 	year = gets.chomp
-	if year != ""
-		$db.execute("UPDATE books SET year = ? WHERE id = ?", year.to_i, id_num)
+	if year == ""
+		year = work['year'].to_i
 	end
 
-	puts "To see the new record, press any key"
-	call_record(id_num)
+	puts "The new records will be:\n"
+	puts "Title:.....#{title}"
+	puts "Author:....#{auth}"
+	puts "Language:..#{language}"
+	puts "Country:...#{country}"
+	puts "Subject:...#{subject}"
+	puts "Year:......#{year}"
+
+	puts "Is this correct? (y/n)"
+	puts "Or press 'C' to cancel"
+	correct = gets.chomp
+	if correct == "y" || correct == "Y"
+		$db.execute("UPDATE books SET title = ?, author = ?, language = ?, country = ?, subject = ?, year = ? WHERE id = ?", title, auth, language, country, subject, year.to_i, id_num)
+	elsif correct == "c" || correct == "C"
+		update
+	elsif correct == "n" || correct == "N" || correct == ""
+		puts "\e[H\e[2J"
+		call_record(id_num)
+		edit_record(id_num)
+	end
 	
-	puts "To return to editing, please press 'R'"
+	puts "To make further edits, press 'C'"
+	puts "To return to the list of records, press 'R'"
+	puts "To view the new record, press 'V'"
 	puts "To return home, press 'H'"
 	option = gets.chomp
-	if option == 'r' || option == 'R'
+	if option == 'c' || option == 'C'
 		edit_record(id_num)
+	elsif option == 'r' || option == 'R'
+		update
+	elsif option == 'v' || option == 'V'
+		call_record(id_num)
 	elsif option == 'h' || option == 'H'
 		homescreen
 	end
@@ -242,91 +318,118 @@ def call_record(id_num)
 	Country:\t#{work['country']}
 	Subject:\t#{work['subject']}
 	Year:\t\t#{work['year']}}
-
 end
 
 def edit_field
+	puts "\e[H\e[2J"
 	puts "Which field would you like to edit?"
-	puts "1 = country"
-	puts "2 = language"
-	puts "3 = subject"
+	puts "c = country"
+	puts "l = language"
+	puts "s = subject"
+	puts "a = author"
 	puts "(leave blank to go home)"
 	field = gets.chomp
-	if field == "1"
-		$db.execute("SELECT DISTINCT country FROM books").each do |x|
-			puts %Q{#{x['country']}}
-		end
-		puts "Enter the country to edit"
-		puts "Leave blank to go home"
-		old_c = gets.chomp
-		if old_c == ""
-			homescreen
-		elsif old_c != ""
-			puts "Enter the new name"
-			new_c = gets.chomp
-			puts "The COUNTRY field for all records labelled #{old_c} will be changed to #{new_c}"
-			puts "continue? (y/n)"
-			choice = gets.chomp
-			if choice == "y" || choice == "Y"
-				$db.execute("UPDATE books SET country = ? WHERE country = ?", new_c, old_c)
-			else
-				edit_field
-			end
+	if field == "c" || field == "C"
+		change_field("country")
+	elsif field == "l" || field == "L"
+		change_field("language")
+	elsif field == "s" || field == "S"
+		change_field("subject")
+	elsif field == "a" || field == "A"
+		change_field("author")
+	else
+		homescreen
+	end
+end
 
-			puts "To return home, press enter"
-			go = gets.chomp
-			go.scan(/./)
-				homescreen
-		end
 
-	elsif field == "2"
-		$db.execute("SELECT DISTINCT language FROM books").each do |x|
-			puts %Q{#{x['language']}}
-		end
-		puts "Enter the language to edit"
-		old_l = gets.chomp
+def change_field(cls)
+	puts "here are the options for #{cls}:"
+	fields = Array.new
+	$db.execute("SELECT DISTINCT #{cls} FROM books").each do |x|
+#		puts %Q{\t#{x["#{cls}"]}}
+		fields.push( %Q{\t#{x["#{cls}"]}} )
+	end
+
+	fields.sort.each{|x| puts x}
+
+	puts "\nEnter the #{cls} to edit"
+	puts "Leave blank to go home"
+	old_f = gets.chomp
+	if old_f == ""
+		homescreen
+	elsif old_f != ""
+		puts "\e[H\e[2J"
+		puts "updating #{old_f}"
 		puts "Enter the new name"
-		new_l = gets.chomp
-		puts "The LANGUAGE field for all records labelled #{old_l} will be changed to #{new_l}"
-		puts "continue? (y/n)"
+		new_f = gets.chomp
+		puts "The #{cls} field for all records labelled #{old_f} will be changed to #{new_f}"
+		puts "Continue? (y/n)"
 		choice = gets.chomp
 		if choice == "y" || choice == "Y"
-			$db.execute("UPDATE books SET language = ? WHERE language = ?", new_l, old_l)
+			$db.execute("UPDATE books SET #{cls} = ? WHERE #{cls} = ?", new_f, old_f)
 		else
 			edit_field
 		end
 
-		puts "To return home, press enter"
-		go = gets.chomp
-		go.scan(/./)
-			homescreen
-
-	elsif field == "3"
-		$db.execute("SELECT DISTINCT subject FROM books").each do |x|
-			puts %Q{#{x['subject']}}
-		end
-		puts "Enter the subject to edit"
-		old_s = gets.chomp
-		puts "Enter the new name"
-		new_s = gets.chomp
-		puts "The SUBJECT field for all records labelled #{old_s} will be changed to #{new_s}"
-		puts "continue? (y/n)"
-		choice = gets.chomp
-		if choice == "y" || choice == "Y"
-			$db.execute("UPDATE books SET subject = ? WHERE subject = ?", new_s, old_s)
-		else
-			edit_field
-		end
-
-		puts "To return home, press enter"
-		go = gets.chomp
-		go.scan(/./)
-			homescreen
+		get_back
 
 	else
 		homescreen
 	end
+end
 
-end	
+def stats
+	puts "\e[H\e[2J"
+	puts "stats screen\n\n"
+	puts "\t\t\t\t\tAuthor........#{maxes("author")}"
+	puts "\t\t\t\t\tLanguage......#{maxes("language")}"
+	puts "\t\t\t\t\tCountry.......#{maxes("country")}"
+	puts "\t\t\t\t\tSubject.......#{maxes("subject")}"
+	puts "\t\t\t\t\tYear..........#{maxes("year")}"
+	puts "\t\t\t\t\tDecade........#{most_decade}"
+
+	get_back
+end
+
+
+# returns the most frequently appearing value for a given field in the database
+def maxes(field)
+	result = Array.new
+	$db.execute("SELECT #{field} FROM books").each do |b|
+		result.push("#{b["#{field}"]}")
+	end
+	freq = result.inject(Hash.new(0)) {|h,v| h[v] += 1; h}
+	ans = result.max_by {|v| freq[v]}
+	return "#{ans} (#{freq[ans]})"
+end
+
+def most_decade
+	years = Array.new
+	$db.execute("SELECT year FROM books").each do |b|
+		years.push("#{b['year']}")
+	end
+	years.each_index {|x| years[x] = years[x].to_s.chop.to_i}
+	freq = years.inject(Hash.new(0)) {|h,v| h[v] += 1; h}
+	ans = years.max_by {|v| freq[v]}
+	return "#{ans}0s (#{freq[ans]})"
+end
+
+def import
+	puts "Enter the name of the file you want to import"
+	filename = gets.chomp
+	File.open("#{filename}", "r").each do |line|
+		$db.execute("INSERT INTO books (title, author, subject, language, country) VALUES (?, ?, ?, ?, ?)", line.chomp.split(/::/)[0], line.chomp.split(/::/)[1], line.chomp.split(/::/)[2], line.chomp.split(/::/)[3], line.chomp.split(/::/)[4])
+	end
+
+	get_back
+end
+
+def get_back
+	puts "To return home, press any key"
+	key = gets.chomp
+	key.scan(/./)
+		homescreen
+end
 
 homescreen

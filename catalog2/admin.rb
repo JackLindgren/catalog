@@ -58,6 +58,7 @@ def homescreen
 	puts "\n\n\t\t\t\t\te = enter a book"
 	puts "\n\n\t\t\t\t\ts = setup the database"
 	puts "\n\n\t\t\t\t\tu = update a record"
+	puts "\n\n\t\t\t\t\td = delete a record"
 	puts "\n\n\t\t\t\t\tf = update a field"
 	puts "\n\n\t\t\t\t\tv = view all records"
 	puts "\n\n\t\t\t\t\ti = view some stats"
@@ -71,9 +72,11 @@ def homescreen
 	elsif choice == "s" || choice == "S"
 		create_table
 	elsif choice == "u" || choice == "U"
-		update
+		view_all("u")
+	elsif choice == "d" || choice == "D"
+		view_all("d")
 	elsif choice == "v" || choice == "V"
-		view_all
+		view_all("v")
 	elsif choice == "f" || choice == "F"
 		edit_field
 	elsif choice == "p" || choice == "P"
@@ -87,8 +90,16 @@ def homescreen
 	end
 end
 
-def view_all
+def view_all(option)
 	puts "\e[H\e[2J"
+
+	if option == "v"
+		mode = "viewing"
+	elsif option == "u"
+		mode = "updating"
+	elsif option == "d"
+		mode = "deletion"
+	end
 
 	all_books = Array.new
 	$db.execute("SELECT * FROM books").each do |n|
@@ -98,13 +109,11 @@ def view_all
 
 	all_books.sort!
 
-#	puts "\t\t%-25s %-40s %-6s %-15s %-15s %-20s %-4s" % ["Author", "Title", "Year", "Country", "Language", "Subject", "ID \#"]
-#	puts "\n"
-
 	i = 0
 	k = 15
 	while i <= all_books.length
 		puts"\e[H\e[2J"
+		puts "currently in #{mode} mode"
 		puts "\t\t%-30s %-45s %-6s %-15s %-15s %-20s" % ["Author", "Title", "Year", "Country", "Language", "Subject"]
 		puts "\n"
 		while i >= 0  && i < k
@@ -112,6 +121,12 @@ def view_all
 			i += 1
 		end
 		puts "press 'F' to move forward 'B' to move back and 'q' to go home"
+		if option == "u"
+			puts "enter the number of the record you would like to edit"
+		elsif option == "d"
+			puts "enter the number of the record you would like to delete"
+		end
+
 		key = gets.chomp
 		if key == "f" || key == "F" || key == ""
 			k += 15
@@ -120,46 +135,28 @@ def view_all
 			k = k - 15
 		elsif key == "q" || key == "Q"
 			homescreen
-		end
-	end
-	get_back
-end
-
-def update
-	puts "\e[H\e[2J"
-
-	all_books = Array.new
-	$db.execute("SELECT * FROM books").each do |n|
-		book = n
-		all_books.push("\t%-30s %-45s %-4s %-15s %-15s %-20s %-4s" % [book['author'][0..28], book['title'][0..42], book['year'], book['country'], book['language'], book['subject'], book['id']])
-	end
-
-	all_books.sort!
-
-	i = 0
-	k = 15
-	while i < all_books.length
-		puts"\e[H\e[2J"
-		puts "\t\t%-30s %-45s %-4s %-15s %-15s %-20s" % ["Author", "Title", "Year", "Country", "Language", "Subject"]
-		puts "\n"
-		while i >= 0 && i < k
-			puts "\t#{i+1}  #{all_books[i][0..133]}" #so that it won't display the record ID number, but it will remain accessible
-			i += 1
-		end
-		puts "Enter a record number and press ENTER to access that book"
-		puts "ENTER or 'F' to move forward, 'B' to move backward, or 'Q' to quit"
-		key = gets.chomp
-		if key.to_i > 0
+		elsif key.to_i > 0 && option == "u"
 			call_record(all_books[key.to_i - 1][-4..-1].to_i)
 			edit_record(all_books[key.to_i - 1][-4..-1].to_i)
 			break
-		elsif key == "" || key == "f" || key == "F"
-			k += 15
-		elsif key == "b" || key == "B"
-			i = i - 30
-			k = k - 15
-		elsif key == "q" || key == "Q"
-			homescreen
+		elsif key.to_i > 0 && option == "d"
+			call_record(all_books[key.to_i - 1][-4..-1].to_i)
+			puts "Are you SURE you want to delete this record? (y/n)"
+			sure = gets.chomp
+			if sure == "y" || sure == "Y"
+				puts "the record for this book will be permanently deleted from the database."
+				puts "continue? (y/n)"
+				positive = gets.chomp
+				if positive == "y" || positive == "Y"
+					$db.execute("DELETE FROM books WHERE id = ?", "#{all_books[key.to_i - 1][-4..-1].to_i}")
+					puts "Record deleted"
+					get_back
+				else
+					get_back
+				end
+			else
+				get_back
+			end
 		end
 	end
 	get_back
@@ -221,7 +218,7 @@ def edit_record(id_num)
 	if correct == "y" || correct == "Y"
 		$db.execute("UPDATE books SET title = ?, author = ?, language = ?, country = ?, subject = ?, year = ? WHERE id = ?", title, auth, language, country, subject, year.to_i, id_num)
 	elsif correct == "c" || correct == "C"
-		update
+		view_all("u")
 	elsif correct == "n" || correct == "N" || correct == ""
 		puts "\e[H\e[2J"
 		call_record(id_num)
@@ -236,7 +233,7 @@ def edit_record(id_num)
 	if option == 'c' || option == 'C'
 		edit_record(id_num)
 	elsif option == 'r' || option == 'R'
-		update
+		view_all("u")
 	elsif option == 'v' || option == 'V'
 		call_record(id_num)
 	elsif option == 'h' || option == 'H'
