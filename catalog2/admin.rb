@@ -3,96 +3,11 @@ require 'sqlite3'
 $db = SQLite3::Database.new("lib_catalog")
 $db.results_as_hash = true
 
-def disconnect
-	$db.close
-	puts "Bye!"
-	puts "\e[H\e[2J"
-	exit
-end
-
-def create_table
-	puts "Creating books table"
-	$db.execute %q{
-		CREATE TABLE books (
-		id integer primary key,
-		title varchar (50),
-		author varchar (50),
-		country varchar (20),
-		language varchar (20),
-		subject varchar (20),
-		year integer)
-	}
-	puts "\e[H\e[2J"
-	homescreen
-end
-
-def add_book
-	puts "\e[H\e[2J"
-	puts "\n\n\t\t\t\t\tEnter the title"
-	print "\n\n\t\t\t\t\t"
-	title = gets.chomp
-	puts "\n\n\t\t\t\t\tEnter the author's name (Last, First)"
-	print "\n\n\t\t\t\t\t"
-	author = gets.chomp
-	puts "\n\n\t\t\t\t\tEnter the country"
-	print "\n\n\t\t\t\t\t"
-	country = gets.chomp
-	puts "\n\n\t\t\t\t\tEnter the language"
-	print "\n\n\t\t\t\t\t"
-	language = gets.chomp
-	puts "\n\n\t\t\t\t\tEnter the subject"
-	print "\n\n\t\t\t\t\t"
-	subject = gets.chomp
-	puts "\n\n\t\t\t\t\tEnter the year of publication"
-	print "\n\n\t\t\t\t\t"
-	year = gets.chomp.to_i
-
-	$db.execute("INSERT INTO books (title, author, country, language, subject, year) VALUES (?, ?, ?, ?, ?, ?)", title, author, country, language, subject, year)
-
-	get_back
-end
-
-def homescreen
-	puts "\e[H\e[2J"
-	puts "\n\n\t\t\t\t\tWhat would you like to do?"
-	puts "\n\n\t\t\t\t\te = enter a book"
-	puts "\n\n\t\t\t\t\ts = setup the database"
-	puts "\n\n\t\t\t\t\tu = update a record"
-	puts "\n\n\t\t\t\t\td = delete a record"
-	puts "\n\n\t\t\t\t\tf = update a field"
-	puts "\n\n\t\t\t\t\tv = view all records"
-	puts "\n\n\t\t\t\t\ti = view some stats"
-	puts "\n\n\t\t\t\t\tp = import a file"
-	puts "\n\n\t\t\t\t\tq = quit"
-	print "\n\n\t\t\t\t\t"	
-	choice = gets.chomp
-
-	if choice == "e" || choice == "E"
-		add_book
-	elsif choice == "s" || choice == "S"
-		create_table
-	elsif choice == "u" || choice == "U"
-		view_all("u")
-	elsif choice == "d" || choice == "D"
-		view_all("d")
-	elsif choice == "v" || choice == "V"
-		view_all("v")
-	elsif choice == "f" || choice == "F"
-		edit_field
-	elsif choice == "p" || choice == "P"
-		import
-	elsif choice == "q" || choice == "Q"
-		disconnect
-	elsif choice == "i" || choice == "I"
-		stats
-	else
-		homescreen
-	end
-end
-
 def view_all(option)
+	#This is basically where the most stuff happens
 	puts "\e[H\e[2J"
 
+	#consolidated the view, update, and delete functions into one place
 	if option == "v"
 		mode = "viewing"
 	elsif option == "u"
@@ -111,12 +26,12 @@ def view_all(option)
 
 	i = 0
 	k = 15
-	while i <= all_books.length
+	while i < all_books.length
 		puts"\e[H\e[2J"
 		puts "currently in #{mode} mode"
 		puts "\t\t%-30s %-45s %-6s %-15s %-15s %-20s" % ["Author", "Title", "Year", "Country", "Language", "Subject"]
 		puts "\n"
-		while i >= 0  && i < k
+		while i >= 0  && i < k && i < all_books.length
 			puts "\t#{i+1}  #{all_books[i][0..133]}"
 			i += 1
 		end
@@ -160,6 +75,190 @@ def view_all(option)
 		end
 	end
 	get_back
+end
+
+def edit_field
+	puts "\e[H\e[2J"
+	puts "Which field would you like to edit?"
+	puts "c = country"
+	puts "l = language"
+	puts "s = subject"
+	puts "a = author"
+	puts "(leave blank to go home)"
+	field = gets.chomp
+	if field == "c" || field == "C"
+		change_field("country")
+	elsif field == "l" || field == "L"
+		change_field("language")
+	elsif field == "s" || field == "S"
+		change_field("subject")
+	elsif field == "a" || field == "A"
+		change_field("author")
+	else
+		homescreen
+	end
+end
+
+def change_field(cls)
+	puts "here are the options for #{cls}:"
+	fields = Array.new
+	$db.execute("SELECT DISTINCT #{cls} FROM books").each do |x|
+		fields.push( %Q{\t#{x["#{cls}"]}} )
+	end
+
+	fields.sort.each{|x| puts x}
+
+	puts "\nEnter the #{cls} to edit"
+	puts "Leave blank to go home"
+	old_f = gets.chomp
+	if old_f == ""
+		homescreen
+	elsif old_f != ""
+		puts "\e[H\e[2J"
+		puts "updating #{old_f}"
+		puts "Enter the new name"
+		new_f = gets.chomp
+		puts "The #{cls} field for all records labelled #{old_f} will be changed to #{new_f}"
+		puts "Continue? (y/n)"
+		choice = gets.chomp
+		if choice == "y" || choice == "Y"
+			$db.execute("UPDATE books SET #{cls} = ? WHERE #{cls} = ?", new_f, old_f)
+		else
+			edit_field
+		end
+
+		get_back
+
+	else
+		homescreen
+	end
+end
+
+def stats
+	#want it to do more here.
+	# top 10 authors
+	# top 5 countires
+	# top 5 languages
+	# top 5 decades
+	puts "\e[H\e[2J"
+	puts "stats screen\n\n"
+	puts "\t\t\t\t\tAuthor........#{maxes("author")}"
+	puts "\t\t\t\t\tLanguage......#{maxes("language")}"
+	puts "\t\t\t\t\tCountry.......#{maxes("country")}"
+	puts "\t\t\t\t\tSubject.......#{maxes("subject")}"
+	puts "\t\t\t\t\tYear..........#{maxes("year")}"
+	puts "\t\t\t\t\tDecade........#{most_decade}"
+
+	get_back
+end
+
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
+#                                           #
+#    stuff up here can use work             #
+#                                           #
+#############################################
+#                                           #
+#    happy with how these work right now    #
+#                                           #
+#vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv#
+
+def homescreen
+	puts "\e[H\e[2J"
+	puts "\n\n\t\t\t\t\tWhat would you like to do?"
+	puts "\n\n\t\t\t\t\te = enter a book"
+	puts "\n\n\t\t\t\t\ts = setup the database"
+	puts "\n\n\t\t\t\t\tu = update a record"
+	puts "\n\n\t\t\t\t\td = delete a record"
+	puts "\n\n\t\t\t\t\tf = update a field"
+	puts "\n\n\t\t\t\t\tv = view all records"
+	puts "\n\n\t\t\t\t\ti = view some stats"
+	puts "\n\n\t\t\t\t\tp = import a file"
+	puts "\n\n\t\t\t\t\tq = quit"
+	print "\n\n\t\t\t\t\t"	
+	choice = gets.chomp
+
+	if choice == "e" || choice == "E"
+		add_book
+	elsif choice == "s" || choice == "S"
+		create_table
+	elsif choice == "u" || choice == "U"
+		view_all("u")
+	elsif choice == "d" || choice == "D"
+		view_all("d")
+	elsif choice == "v" || choice == "V"
+		view_all("v")
+	elsif choice == "f" || choice == "F"
+		edit_field
+	elsif choice == "p" || choice == "P"
+		import
+	elsif choice == "q" || choice == "Q"
+		disconnect
+	elsif choice == "i" || choice == "I"
+		stats
+	else
+		homescreen
+	end
+end
+
+def maxes(field)
+	result = Array.new
+	$db.execute("SELECT #{field} FROM books").each do |b|
+		result.push("#{b["#{field}"]}")
+	end
+	freq = result.inject(Hash.new(0)) {|h,v| h[v] += 1; h}
+	ans = result.max_by {|v| freq[v]}
+	return "#{ans} (#{freq[ans]})"
+end
+
+def most_decade
+	years = Array.new
+	$db.execute("SELECT year FROM books").each do |b|
+		years.push("#{b['year']}")
+	end
+	years.each_index {|x| years[x] = years[x].to_s.chop.to_i}
+	freq = years.inject(Hash.new(0)) {|h,v| h[v] += 1; h}
+	ans = years.max_by {|v| freq[v]}
+	return "#{ans}0s (#{freq[ans]})"
+end
+
+def import
+	puts "Enter the name of the file you want to import"
+	filename = gets.chomp
+	File.open("#{filename}", "r").each do |line|
+		$db.execute("INSERT INTO books (title, author, subject, language, country) VALUES (?, ?, ?, ?, ?)", line.chomp.split(/::/)[0], line.chomp.split(/::/)[1], line.chomp.split(/::/)[2], line.chomp.split(/::/)[3], line.chomp.split(/::/)[4])
+	end
+
+	get_back
+end
+
+def get_back
+	puts "To return home, press any key"
+	key = gets.chomp
+	key.scan(/./)
+		homescreen
+end
+
+def disconnect
+	$db.close
+	puts "Bye!"
+	puts "\e[H\e[2J"
+	exit
+end
+
+def create_table
+	puts "Creating books table"
+	$db.execute %q{
+		CREATE TABLE books (
+		id integer primary key,
+		title varchar (50),
+		author varchar (50),
+		country varchar (20),
+		language varchar (20),
+		subject varchar (20),
+		year integer)
+	}
+	puts "\e[H\e[2J"
+	homescreen
 end
 
 def edit_record(id_num)
@@ -241,6 +340,33 @@ def edit_record(id_num)
 	end
 end
 
+
+def add_book
+	puts "\e[H\e[2J"
+	puts "\n\n\t\t\t\t\tEnter the title"
+	print "\n\n\t\t\t\t\t"
+	title = gets.chomp
+	puts "\n\n\t\t\t\t\tEnter the author's name (Last, First)"
+	print "\n\n\t\t\t\t\t"
+	author = gets.chomp
+	puts "\n\n\t\t\t\t\tEnter the country"
+	print "\n\n\t\t\t\t\t"
+	country = gets.chomp
+	puts "\n\n\t\t\t\t\tEnter the language"
+	print "\n\n\t\t\t\t\t"
+	language = gets.chomp
+	puts "\n\n\t\t\t\t\tEnter the subject"
+	print "\n\n\t\t\t\t\t"
+	subject = gets.chomp
+	puts "\n\n\t\t\t\t\tEnter the year of publication"
+	print "\n\n\t\t\t\t\t"
+	year = gets.chomp.to_i
+
+	$db.execute("INSERT INTO books (title, author, country, language, subject, year) VALUES (?, ?, ?, ?, ?, ?)", title, author, country, language, subject, year)
+
+	get_back
+end
+
 def call_record(id_num)
 	puts "\e[H\e[2J"
 	work = $db.execute("SELECT * FROM books where id = ?", id_num).first
@@ -259,116 +385,6 @@ def call_record(id_num)
 	Year:\t\t#{work['year']}}
 end
 
-def edit_field
-	puts "\e[H\e[2J"
-	puts "Which field would you like to edit?"
-	puts "c = country"
-	puts "l = language"
-	puts "s = subject"
-	puts "a = author"
-	puts "(leave blank to go home)"
-	field = gets.chomp
-	if field == "c" || field == "C"
-		change_field("country")
-	elsif field == "l" || field == "L"
-		change_field("language")
-	elsif field == "s" || field == "S"
-		change_field("subject")
-	elsif field == "a" || field == "A"
-		change_field("author")
-	else
-		homescreen
-	end
-end
 
-
-def change_field(cls)
-	puts "here are the options for #{cls}:"
-	fields = Array.new
-	$db.execute("SELECT DISTINCT #{cls} FROM books").each do |x|
-#		puts %Q{\t#{x["#{cls}"]}}
-		fields.push( %Q{\t#{x["#{cls}"]}} )
-	end
-
-	fields.sort.each{|x| puts x}
-
-	puts "\nEnter the #{cls} to edit"
-	puts "Leave blank to go home"
-	old_f = gets.chomp
-	if old_f == ""
-		homescreen
-	elsif old_f != ""
-		puts "\e[H\e[2J"
-		puts "updating #{old_f}"
-		puts "Enter the new name"
-		new_f = gets.chomp
-		puts "The #{cls} field for all records labelled #{old_f} will be changed to #{new_f}"
-		puts "Continue? (y/n)"
-		choice = gets.chomp
-		if choice == "y" || choice == "Y"
-			$db.execute("UPDATE books SET #{cls} = ? WHERE #{cls} = ?", new_f, old_f)
-		else
-			edit_field
-		end
-
-		get_back
-
-	else
-		homescreen
-	end
-end
-
-def stats
-	puts "\e[H\e[2J"
-	puts "stats screen\n\n"
-	puts "\t\t\t\t\tAuthor........#{maxes("author")}"
-	puts "\t\t\t\t\tLanguage......#{maxes("language")}"
-	puts "\t\t\t\t\tCountry.......#{maxes("country")}"
-	puts "\t\t\t\t\tSubject.......#{maxes("subject")}"
-	puts "\t\t\t\t\tYear..........#{maxes("year")}"
-	puts "\t\t\t\t\tDecade........#{most_decade}"
-
-	get_back
-end
-
-
-# returns the most frequently appearing value for a given field in the database
-def maxes(field)
-	result = Array.new
-	$db.execute("SELECT #{field} FROM books").each do |b|
-		result.push("#{b["#{field}"]}")
-	end
-	freq = result.inject(Hash.new(0)) {|h,v| h[v] += 1; h}
-	ans = result.max_by {|v| freq[v]}
-	return "#{ans} (#{freq[ans]})"
-end
-
-def most_decade
-	years = Array.new
-	$db.execute("SELECT year FROM books").each do |b|
-		years.push("#{b['year']}")
-	end
-	years.each_index {|x| years[x] = years[x].to_s.chop.to_i}
-	freq = years.inject(Hash.new(0)) {|h,v| h[v] += 1; h}
-	ans = years.max_by {|v| freq[v]}
-	return "#{ans}0s (#{freq[ans]})"
-end
-
-def import
-	puts "Enter the name of the file you want to import"
-	filename = gets.chomp
-	File.open("#{filename}", "r").each do |line|
-		$db.execute("INSERT INTO books (title, author, subject, language, country) VALUES (?, ?, ?, ?, ?)", line.chomp.split(/::/)[0], line.chomp.split(/::/)[1], line.chomp.split(/::/)[2], line.chomp.split(/::/)[3], line.chomp.split(/::/)[4])
-	end
-
-	get_back
-end
-
-def get_back
-	puts "To return home, press any key"
-	key = gets.chomp
-	key.scan(/./)
-		homescreen
-end
-
+#main
 homescreen
