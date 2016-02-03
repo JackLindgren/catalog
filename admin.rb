@@ -17,12 +17,13 @@ def view_all(option)
 	end
 
 	all_books = Array.new
-	$db.execute("SELECT * FROM books").each do |n|
+	#$db.execute("SELECT * FROM books").each do |n|
+	$db.execute("SELECT * FROM books order by author, year").each do |n|
 		book = n
 		all_books.push("\t%-30s %-45s %-6s %-15s %-15s %-20s %-4s" % [book['author'][0..28], book['title'][0..42], book['year'], book['country'], book['language'], book['subject'], book['id']])
 	end
 
-	all_books.sort!
+	#all_books.sort!
 
 	i = 0
 	k = 15
@@ -174,25 +175,35 @@ def stats
 end
 
 def top_5(field)
-	result = Array.new
-	top5 = Array.new
+#	result = Array.new
+#	top5 = Array.new
 
-	$db.execute("SELECT #{field} FROM books").each do |b|
-		result.push("#{b["#{field}"]}")
+#	$db.execute("SELECT #{field} FROM books").each do |b|
+#		result.push("#{b["#{field}"]}")
+#	end
+	book_total = 0
+
+	$db.execute("SELECT COUNT(*) FROM books;").each do |c|
+		book_total = c["COUNT(*)"]
 	end
 
-	5.times do
-		freq = result.inject(Hash.new(0)) {|h,v| h[v] += 1; h}
-		ans = result.max_by {|v| freq[v]}
-		top5.push("#{ans} (#{freq[ans]})")
-		result.delete(ans)
+	$db.execute("SELECT #{field}, COUNT(#{field}) FROM books GROUP BY #{field} ORDER BY COUNT(*) DESC LIMIT 5;").each do |b|
+		percentage = (( b["COUNT(#{field})"].to_f / book_total ) * 100).round(2)
+		puts "#{b["#{field}"]}, #{b["COUNT(#{field})"]}, #{percentage}%"
 	end
 
-	i = 0
-	while i < top5.length
-		puts top5[i]
-		i +=1
-	end
+#	5.times do
+#		freq = result.inject(Hash.new(0)) {|h,v| h[v] += 1; h}
+#		ans = result.max_by {|v| freq[v]}
+#		top5.push("#{ans} (#{freq[ans]})")
+#		result.delete(ans)
+#	end
+
+#	i = 0
+#	while i < top5.length
+#		puts top5[i]
+#		i +=1
+#	end
 
 end
 
@@ -300,7 +311,7 @@ def create_table
 		country varchar (20),
 		language varchar (20),
 		subject varchar (20),
-		year integer)
+		year (integer)
 	}
 	puts "\e[H\e[2J"
 	homescreen
