@@ -175,35 +175,36 @@ def stats
 end
 
 def top_5(field)
-#	result = Array.new
-#	top5 = Array.new
+	# result = Array.new
+	# top5 = Array.new
 
-#	$db.execute("SELECT #{field} FROM books").each do |b|
-#		result.push("#{b["#{field}"]}")
-#	end
+	# $db.execute("SELECT #{field} FROM books").each do |b|
+	#	result.push("#{b["#{field}"]}")
+	# end
 	book_total = 0
 
 	$db.execute("SELECT COUNT(*) FROM books;").each do |c|
 		book_total = c["COUNT(*)"]
 	end
 
-	$db.execute("SELECT #{field}, COUNT(#{field}) FROM books GROUP BY #{field} ORDER BY COUNT(*) DESC LIMIT 5;").each do |b|
+	#$db.execute("SELECT #{field}, COUNT(#{field}) FROM books GROUP BY #{field} ORDER BY COUNT(*) DESC LIMIT 5;").each do |b|
+	$db.execute("SELECT #{field}, COUNT(#{field}) FROM books GROUP BY #{field} ORDER BY COUNT(*) DESC LIMIT 10;").each do |b|
 		percentage = (( b["COUNT(#{field})"].to_f / book_total ) * 100).round(2)
 		puts "#{b["#{field}"]}, #{b["COUNT(#{field})"]}, #{percentage}%"
 	end
 
-#	5.times do
-#		freq = result.inject(Hash.new(0)) {|h,v| h[v] += 1; h}
-#		ans = result.max_by {|v| freq[v]}
-#		top5.push("#{ans} (#{freq[ans]})")
-#		result.delete(ans)
-#	end
+	#	5.times do
+	#		freq = result.inject(Hash.new(0)) {|h,v| h[v] += 1; h}
+	#		ans = result.max_by {|v| freq[v]}
+	#		top5.push("#{ans} (#{freq[ans]})")
+	#		result.delete(ans)
+	#	end
 
-#	i = 0
-#	while i < top5.length
-#		puts top5[i]
-#		i +=1
-#	end
+	#	i = 0
+	#	while i < top5.length
+	#		puts top5[i]
+	#		i +=1
+	#	end
 
 end
 
