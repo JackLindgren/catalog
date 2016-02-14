@@ -15,6 +15,10 @@ def paginate(p):
 	end   = p * pageLength
 	return actions[start:end]
 
+# tput cols - then we can get the number of columns 
+# which will let us divide the fields proportionally
+# e.g. "title" takes up 1/5, author takes up 1/5, etc.
+
 def lastPage(p):
 	pageLength = 15
 	if len(actions) % pageLength == 0:
