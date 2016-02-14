@@ -19,6 +19,15 @@ def paginate(p):
 # which will let us divide the fields proportionally
 # e.g. "title" takes up 1/5, author takes up 1/5, etc.
 
+# row, columns = os.popen('stty size', 'r').read().split()
+
+# author = 8  / 34
+# title  = 12 / 34
+# year   = 2  / 34
+# country= 4  / 34
+# lang   = 4  / 34
+# subj   = 4  / 34
+
 def lastPage(p):
 	pageLength = 15
 	if len(actions) % pageLength == 0:
