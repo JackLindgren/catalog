@@ -7,17 +7,16 @@ for i in range(1, 60):
 def paginate(p):
 	# takes a page number and returns the items belonging to that page
 	pageLength = 15	#each page will have max 15 items
-
 	if len(actions) % pageLength == 0:
 		pageCount = len(actions) / pageLength
 	else:
 		pageCount = ( len(actions) / pageLength ) + 1
-#	start = p * ( pageLength - 1)
 	start = (p * pageLength) - pageLength
 	end   = p * pageLength
 	return actions[start:end]
 
 def Nscreen(n, items):
+	screen.addstr("Back\n")
 	i = 0
 	while i < len(items):
 		if i == n:
@@ -25,6 +24,7 @@ def Nscreen(n, items):
 		else:
 			screen.addstr(items[i])
 		i = i + 1
+	screen.addstr("Next\n")
 
 def EnterScreen(k, items):
 	screen.addstr("You pressed a button!\n")
