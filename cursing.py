@@ -11,18 +11,33 @@ class Book:
 		self.country = bookData[3]
 		self.language = bookData[4]
 
-conn = sqlite3.connect("lib_catalog")
-c = conn.cursor()
-AllBooks = c.execute("SELECT * FROM books ORDER BY author, year")
-bookObjects = []
-for entry in AllBooks:
-	bookObjects.append(Book(entry))
+class PageInfo:
+	def __init__(self):
+		rows, columns = os.popen('stty size', 'r').read().split()
+		self.auth = int((8.0  / 34) * int(columns))
+		self.titl = int((12.0 / 34) * int(columns))
+		self.year = 6
+		self.coun = int((4.0  / 34) * int(columns))
+		self.lang = int((4.0  / 34) * int(columns))
+		self.subj = int((4.0  / 34) * int(columns))
+		self.rows = int(rows)
 
-actions = bookObjects
+def getBooks():
+	# connects to the database
+	# gets all th books
+	# returns an array of book objects
+	conn = sqlite3.connect("lib_catalog")
+	c = conn.cursor()
+	AllBooks = c.execute("SELECT * FROM books ORDER BY author, year")
+	bookObjects = []
+	for entry in AllBooks:
+		bookObjects.append(Book(entry))
+	return bookObjects
 
-#actions = []
-#for i in range(1, 73):
-#	actions.append("line number: {0}\n".format(i))
+def rowFormat(entry):
+	format = PageInfo()
+	row = entry.author[:format.auth].ljust(format.auth) + entry.title[:format.titl].ljust(format.titl) + str(entry.year)[:format.year].ljust(format.year) + entry.country[:format.coun].ljust(format.coun) + "\n"
+	return row
 
 def paginate(p):
 	# takes a page number and returns the items belonging to that page
@@ -31,58 +46,48 @@ def paginate(p):
 	useRows = PageInfo()
 	pageLength = useRows.rows - 5
 
-	if len(actions) % pageLength == 0:
-		pageCount = len(actions) / pageLength
+	if len(myBooks) % pageLength == 0:
+		pageCount = len(myBooks) / pageLength
 	else:
-		pageCount = ( len(actions) / pageLength ) + 1
+		pageCount = ( len(myBooks) / pageLength ) + 1
+	
 	start = (p * pageLength) - pageLength
 	end   = p * pageLength
-	return actions[start:end]
-
-class PageInfo:
-	def __init__(self):
-		rows, columns = os.popen('stty size', 'r').read().split()
-		self.auth = int((8.0  / 34) * int(columns))
-		self.titl = int((12.0 / 34) * int(columns))
-		self.year = 5
-		self.coun = int((4.0  / 34) * int(columns))
-		self.lang = int((4.0  / 34) * int(columns))
-		self.subj = int((4.0  / 34) * int(columns))
-		self.rows = int(rows)
+	return myBooks[start:end]
 
 def lastPage(p):
 	useRows = PageInfo()
 	pageLength = useRows.rows - 5
-	if len(actions) % pageLength == 0:
-		pageCount = len(actions) / pageLength
+	if len(myBooks) % pageLength == 0:
+		pageCount = len(myBooks) / pageLength
 	else:
-		pageCount = ( len(actions) / pageLength ) + 1
+		pageCount = ( len(myBooks) / pageLength ) + 1
 	if p == pageCount:
 		return True
 	else:
 		return False
 
-def Nscreen(n, items):
-	if n == -1:
-		screen.addstr("Back\n", curses.A_REVERSE)
-	else:
-		screen.addstr("Back\n")
-
-	form = PageInfo()
-
+def Nscreen(n, pageItems):
+	# pageItems is an array with the current page's items (take from the main array)
+	screen.addstr("Back\n")
 	i = 0
-	while i < len(items):
+	while i < len(pageItems):
 		if i == n:
-			screen.addstr(items[i].title, items[i].author, curses.A_REVERSE)
+			try:
+				screen.addstr(rowFormat(pageItems[i]), curses.A_REVERSE)
+			except UnicodeEncodeError:
+				screen.addstr("x\n", curses.A_REVERSE)
+			#screen.addstr(items[i].title, items[i].author, curses.A_REVERSE)
 			#screen.addstr(items[i], curses.A_REVERSE)
 		else:
-			screen.addstr(items[i].title, items[i].author)
+			try:
+				screen.addstr(rowFormat(pageItems[i]))
+			except UnicodeEncodeError:
+				screen.addstr("x\n")
+			# screen.addstr(items[i].title, items[i].author)
 			#screen.addstr(items[i])
 		i = i + 1
-	if n == len(items):
-		screen.addstr("Next\n", curses.A_REVERSE)
-	else:
-		screen.addstr("Next\n")
+	screen.addstr("Next\n")
 
 def EnterScreen(k, items):
 	screen.addstr("You pressed a button!\n")
@@ -92,6 +97,8 @@ def main(row, page):
 	curses.noecho()
 	curses.curs_set(0)
 	screen.keypad(1)
+
+	#items = getBooks()
 
 	while True:
 		event = screen.getch()
@@ -138,7 +145,9 @@ screen = curses.initscr()
 # curses.curs_set(0)
 # curses.keypad(1)
 
+myBooks = getBooks()
 #Nscreen(curScreen)
+
 items = paginate(page)
 Nscreen(row, items)
 main(0, page)
