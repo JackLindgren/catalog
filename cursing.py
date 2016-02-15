@@ -39,7 +39,7 @@ def getBooks():
 def rowFormat(entry):
 	# the formatting is found in a PageInfo object which tells us how wide each column should be, based on the width of the current terminal
 	format = PageInfo()
-	return entry.author[:format.auth].ljust(format.auth + 1) + entry.title[:format.titl].ljust(format.titl + 1) + str(entry.year)[:format.year].ljust(format.year + 1) + entry.country[:format.coun].ljust(format.coun + 1) + entry.language[:format.lang].ljust(format.lang + 1) + entry.topic[:format.subj].ljust(format.subj + 1) + "\n"
+	return entry.author[:format.auth - 1].ljust(format.auth) + entry.title[:format.titl - 1].ljust(format.titl) + str(entry.year)[:format.year].ljust(format.year) + entry.country[:format.coun - 1].ljust(format.coun) + entry.language[:format.lang - 1].ljust(format.lang) + entry.topic[:format.subj - 1].ljust(format.subj) + "\n"
 
 def paginate(p):
 	# takes a page number and returns the items belonging to that page
@@ -71,7 +71,7 @@ def lastPage(p):
 
 def topLabel():
 	format = PageInfo()
-	label = "AUTHOR"[:format.auth].ljust(format.auth + 1) + "TITLE"[:format.titl].ljust(format.titl + 1) + "YEAR"[:format.year].ljust(format.year + 1) + "COUNTRY"[:format.coun].ljust(format.coun + 1) + "LANGUAGE"[:format.lang].ljust(format.lang + 1) + "SUBJECT"[:format.subj].ljust(format.subj + 1) + "\n"
+	label = "AUTHOR"[:format.auth - 1].ljust(format.auth) + "TITLE"[:format.titl - 1].ljust(format.titl) + "YEAR"[:format.year - 1].ljust(format.year) + "COUNTRY"[:format.coun - 1].ljust(format.coun) + "LANGUAGE"[:format.lang - 1].ljust(format.lang) + "SUBJECT"[:format.subj - 1].ljust(format.subj) + "\n"
 	return str(label)
 
 def Nscreen(n, pageItems):
