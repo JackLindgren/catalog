@@ -1,9 +1,28 @@
 import curses
 import os
+import sqlite3
 
-actions = []
-for i in range(1, 73):
-	actions.append("line number: {0}\n".format(i))
+class Book:
+	def __init__(self, bookData):
+		self.year = bookData[6]
+		self.topic = bookData[5]
+		self.title = bookData[1]
+		self.author = bookData[2]
+		self.country = bookData[3]
+		self.language = bookData[4]
+
+conn = sqlite3.connect("lib_catalog")
+c = conn.cursor()
+AllBooks = c.execute("SELECT * FROM books ORDER BY author, year")
+bookObjects = []
+for entry in AllBooks:
+	bookObjects.append(Book(entry))
+
+actions = bookObjects
+
+#actions = []
+#for i in range(1, 73):
+#	actions.append("line number: {0}\n".format(i))
 
 def paginate(p):
 	# takes a page number and returns the items belonging to that page
@@ -23,31 +42,17 @@ def paginate(p):
 class PageInfo:
 	def __init__(self):
 		rows, columns = os.popen('stty size', 'r').read().split()
-		self.author = int((8.0  / 34) * int(columns))
-		self.title  = int((12.0 / 34) * int(columns))
-		self.year   = 5
-		self.country= int((4.0  / 34) * int(columns))
-		self.lang   = int((4.0  / 34) * int(columns))
-		self.subj   = int((4.0  / 34) * int(columns))
-		self.rows   = int(rows)
-
-# tput cols - then we can get the number of columns 
-# which will let us divide the fields proportionally
-# e.g. "title" takes up 1/5, author takes up 1/5, etc.
-
-# row, columns = os.popen('stty size', 'r').read().split()
-
-# author = 8  / 34
-# title  = 12 / 34
-# year   = 2  / 34
-# country= 4  / 34
-# lang   = 4  / 34
-# subj   = 4  / 34
+		self.auth = int((8.0  / 34) * int(columns))
+		self.titl = int((12.0 / 34) * int(columns))
+		self.year = 5
+		self.coun = int((4.0  / 34) * int(columns))
+		self.lang = int((4.0  / 34) * int(columns))
+		self.subj = int((4.0  / 34) * int(columns))
+		self.rows = int(rows)
 
 def lastPage(p):
 	useRows = PageInfo()
 	pageLength = useRows.rows - 5
-#	pageLength = 15
 	if len(actions) % pageLength == 0:
 		pageCount = len(actions) / pageLength
 	else:
@@ -62,12 +67,17 @@ def Nscreen(n, items):
 		screen.addstr("Back\n", curses.A_REVERSE)
 	else:
 		screen.addstr("Back\n")
+
+	form = PageInfo()
+
 	i = 0
 	while i < len(items):
 		if i == n:
-			screen.addstr(items[i], curses.A_REVERSE)
+			screen.addstr(items[i].title, items[i].author, curses.A_REVERSE)
+			#screen.addstr(items[i], curses.A_REVERSE)
 		else:
-			screen.addstr(items[i])
+			screen.addstr(items[i].title, items[i].author)
+			#screen.addstr(items[i])
 		i = i + 1
 	if n == len(items):
 		screen.addstr("Next\n", curses.A_REVERSE)
@@ -112,8 +122,6 @@ def main(row, page):
 
 			useRows = PageInfo()
 			pageLength = useRows.rows - 6
-
-			#row = 14
 			row = pageLength
 			Nscreen(row, items)
 
