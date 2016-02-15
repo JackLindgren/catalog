@@ -1,11 +1,10 @@
 import curses
 import os
 import sqlite3
-import sys
+import locale
 
-reload(sys)
-sys.setdefaultencoding('UTF8')
-
+locale.setlocale(locale.LC_ALL, "")
+code = locale.getpreferredencoding()
 
 class Book:
 	def __init__(self, bookData):
@@ -77,13 +76,13 @@ def Nscreen(n, pageItems):
 	i = 0
 	while i < len(pageItems):
 		if i == n:
-			screen.addstr(rowFormat(pageItems[i]), curses.A_REVERSE)
+			screen.addstr(rowFormat(pageItems[i]).encode(code), curses.A_REVERSE)
 			# try:
 			# 	screen.addstr(rowFormat(pageItems[i]), curses.A_REVERSE)
 			# except UnicodeEncodeError:
 			# 	screen.addstr("x\n", curses.A_REVERSE)
 		else:
-			screen.addstr(rowFormat(pageItems[i]))
+			screen.addstr(rowFormat(pageItems[i]).encode(code))
 			# try:
 			# 	screen.addstr(rowFormat(pageItems[i]))
 			# except UnicodeEncodeError:
