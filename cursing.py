@@ -39,7 +39,7 @@ def getBooks():
 def rowFormat(entry):
 	# the formatting is found in a PageInfo object which tells us how wide each column should be, based on the width of the current terminal
 	format = PageInfo()
-	return entry.author[:format.auth].ljust(format.auth) + entry.title[:format.titl].ljust(format.titl) + str(entry.year)[:format.year].ljust(format.year) + entry.country[:format.coun].ljust(format.coun) + entry.language[:format.lang].ljust(format.lang) + "\n"
+	return entry.author[:format.auth].ljust(format.auth + 1) + entry.title[:format.titl].ljust(format.titl + 1) + str(entry.year)[:format.year].ljust(format.year + 1) + entry.country[:format.coun].ljust(format.coun + 1) + entry.language[:format.lang].ljust(format.lang + 1) + entry.topic[:format.subj].ljust(format.subj + 1) + "\n"
 
 def paginate(p):
 	# takes a page number and returns the items belonging to that page
@@ -69,24 +69,23 @@ def lastPage(p):
 	else:
 		return False
 
+def topLabel():
+	format = PageInfo()
+	label = "AUTHOR"[:format.auth].ljust(format.auth + 1) + "TITLE"[:format.titl].ljust(format.titl + 1) + "YEAR"[:format.year].ljust(format.year + 1) + "COUNTRY"[:format.coun].ljust(format.coun + 1) + "LANGUAGE"[:format.lang].ljust(format.lang + 1) + "SUBJECT"[:format.subj].ljust(format.subj + 1) + "\n"
+	return str(label)
+
 def Nscreen(n, pageItems):
 	# writes the current screen - really just moves the cursor up and down
 	# pageItems is an array with the current page's items (take from the main array)
 	screen.addstr("Back\n")
+	label = topLabel()
+	screen.addstr(label, curses.A_BOLD)
 	i = 0
 	while i < len(pageItems):
 		if i == n:
 			screen.addstr(rowFormat(pageItems[i]).encode(code), curses.A_REVERSE)
-			# try:
-			# 	screen.addstr(rowFormat(pageItems[i]), curses.A_REVERSE)
-			# except UnicodeEncodeError:
-			# 	screen.addstr("x\n", curses.A_REVERSE)
 		else:
 			screen.addstr(rowFormat(pageItems[i]).encode(code))
-			# try:
-			# 	screen.addstr(rowFormat(pageItems[i]))
-			# except UnicodeEncodeError:
-			# 	screen.addstr("x\n")
 		i = i + 1
 	screen.addstr("Next\n")
 
@@ -126,6 +125,7 @@ def main(row, page):
 			row = row - 1
 			Nscreen(row, items)
 		elif event == curses.KEY_UP and row == 0 and page != 1:
+			# go up a page and draw the next screen
 			screen.clear()
 			page = page - 1
 			items = paginate(page)
@@ -136,11 +136,13 @@ def main(row, page):
 			Nscreen(row, items)
 
 		elif event == curses.KEY_LEFT and page != 1:
+			# move the screen one page to the left (stay in the same row)
 			screen.clear()
 			page = page - 1
 			items = paginate(page)
 			Nscreen(row, items)
 		elif event == curses.KEY_RIGHT and (lastPage(page) != True):
+			# move the screen one page to the right (stay in the same row)
 			screen.clear()
 			page = page + 1
 			items = paginate(page)
@@ -154,12 +156,8 @@ row = 0
 page = 1
 
 screen = curses.initscr()
-# curses.noecho()
-# curses.curs_set(0)
-# curses.keypad(1)
 
 myBooks = getBooks()
-#Nscreen(curScreen)
 
 items = paginate(page)
 Nscreen(row, items)
