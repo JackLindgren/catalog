@@ -71,7 +71,7 @@ def lastPage(p):
 
 def topLabel():
 	format = PageInfo()
-	label = "AUTHOR"[:format.auth - 1].ljust(format.auth) + "TITLE"[:format.titl - 1].ljust(format.titl) + "YEAR"[:format.year - 1].ljust(format.year) + "COUNTRY"[:format.coun - 1].ljust(format.coun) + "LANGUAGE"[:format.lang - 1].ljust(format.lang) + "SUBJECT"[:format.subj - 1].ljust(format.subj) + "\n"
+	label = "AUTHOR"[:format.auth - 1].center(format.auth) + "TITLE"[:format.titl - 1].center(format.titl) + "YEAR"[:format.year - 1].center(format.year) + "COUNTRY"[:format.coun - 1].center(format.coun) + "LANGUAGE"[:format.lang - 1].center(format.lang) + "SUBJECT"[:format.subj - 1].center(format.subj) + "\n"
 	return str(label)
 
 def Nscreen(n, pageItems):
