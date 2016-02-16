@@ -79,7 +79,7 @@ def Nscreen(n, pageItems):
 	# pageItems is an array with the current page's items (take from the main array)
 	screen.addstr("Back\n")
 	label = topLabel()
-	screen.addstr(label, curses.A_BOLD)
+	screen.addstr(label, curses.A_BOLD | curses.A_REVERSE)
 	i = 0
 	while i < len(pageItems):
 		if i == n:
