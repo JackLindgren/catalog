@@ -148,6 +148,11 @@ def main(row, page):
 			items = paginate(page)
 			Nscreen(row, items)
 
+		# elif event == 58:
+		# 	screen.addstr(":")
+		# 	curses.echo()
+		# 	opt = raw_input()
+
 		elif event == 10:
 			screen.clear()
 			EnterScreen(row, items)
