@@ -92,8 +92,8 @@ def Nscreen(n, pageItems):
 def EnterScreen(k, items):
 	# displays info about the current selection
 	screen.addstr("You pressed a button!\n")
-	screen.addstr("Title: " + items[k].title + "\n")
-	screen.addstr("Author: " + items[k].author + "\n")
+	screen.addstr("Title: " + items[k].title.encode(code) + "\n")
+	screen.addstr("Author: " + items[k].author.encode(code) + "\n")
 	screen.addstr("Year: " + str(items[k].year) + "\n")
 
 def main(row, page):
