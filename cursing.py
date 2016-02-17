@@ -92,31 +92,34 @@ def Nscreen(n, pageItems):
 def EnterScreen(k, items):
 	# displays info about the current selection
 	status = "edit"
-	screen.clear()
 	screen.addstr("You pressed a button!\n")
 	screen.addstr("Title: " + items[k].title.encode(code) + "\n")
 	screen.addstr("Author: " + items[k].author.encode(code) + "\n")
 	screen.addstr("Year: " + str(items[k].year) + "\n")
-	screen.addstr("abc ", curses.A_REVERSE)
-	screen.addstr("def ")
+	screen.addstr("stay ", curses.A_REVERSE)
+	screen.addstr("go back")
 	while True:
 		event = screen.getch()
 		if event == ord("q"): break
-		screen.clear()
-		screen.addstr("You pressed a button!\n")
-		screen.addstr("Title: " + items[k].title.encode(code) + "\n")
-		screen.addstr("Author: " + items[k].author.encode(code) + "\n")
-		screen.addstr("Year: " + str(items[k].year) + "\n")
 		if event == curses.KEY_LEFT:
-			screen.addstr("abc ", curses.A_REVERSE)
-			screen.addstr("def ")
+			screen.clear()
+			screen.addstr("You pressed a button!\n")
+			screen.addstr("Title: " + items[k].title.encode(code) + "\n")
+			screen.addstr("Author: " + items[k].author.encode(code) + "\n")
+			screen.addstr("Year: " + str(items[k].year) + "\n")
+			status = "stay"
+			screen.addstr("stay ", curses.A_REVERSE)
+			screen.addstr("go back ")
 		elif event == curses.KEY_RIGHT:
+			screen.clear()
+			screen.addstr("You pressed a button!\n")
+			screen.addstr("Title: " + items[k].title.encode(code) + "\n")
+			screen.addstr("Author: " + items[k].author.encode(code) + "\n")
+			screen.addstr("Year: " + str(items[k].year) + "\n")
 			status = "return"
-			screen.addstr("abc ")
-			screen.addstr("def ", curses.A_REVERSE)
+			screen.addstr("stay ")
+			screen.addstr("go back ", curses.A_REVERSE)
 		elif event == 10 and status == "return": break
-		else:
-			screen.addstr("abc def")
 
 def main(row, page):
 	curses.noecho()
@@ -179,6 +182,7 @@ def main(row, page):
 			screen.clear()
 			EnterScreen(row, items)
 			# why doesn't this return to the list screen??:
+			screen.clear()
 			Nscreen(row, items)
 
 row = 0
