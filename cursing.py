@@ -89,7 +89,7 @@ def Nscreen(n, pageItems):
 		i = i + 1
 	screen.addstr("Next\n")
 
-def EnterScreen(k, items):
+def SingleBook(k, items):
 	# displays info about the current selection
 	status = "edit"
 	screen.addstr("You pressed a button!\n")
@@ -173,17 +173,17 @@ def main(row, page):
 			items = paginate(page)
 			Nscreen(row, items)
 
+		elif event == 10:
+			screen.clear()
+			SingleBook(row, items)
+			# why doesn't this return to the list screen??:
+			screen.clear()
+			Nscreen(row, items)
+
 		# elif event == 58:
 		# 	screen.addstr(":")
 		# 	curses.echo()
 		# 	opt = raw_input()
-
-		elif event == 10:
-			screen.clear()
-			EnterScreen(row, items)
-			# why doesn't this return to the list screen??:
-			screen.clear()
-			Nscreen(row, items)
 
 row = 0
 page = 1
