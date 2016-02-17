@@ -89,13 +89,20 @@ def Nscreen(n, pageItems):
 		i = i + 1
 	screen.addstr("Next\n")
 
-def SingleBook(k, items):
-	# displays info about the current selection
-	status = "edit"
+def SingleBookInfo(k, items):
 	screen.addstr("You pressed a button!\n")
 	screen.addstr("Title: " + items[k].title.encode(code) + "\n")
 	screen.addstr("Author: " + items[k].author.encode(code) + "\n")
 	screen.addstr("Year: " + str(items[k].year) + "\n")
+	screen.addstr("Country: " + items[k].country.encode(code) + "\n")
+	screen.addstr("Language: " + items[k].country.encode(code) + "\n")
+	screen.addstr("Subject: " + items[k].topic.encode(code) + "\n")
+
+
+def SingleBook(k, items):
+	# displays info about the current selection
+	status = "edit"
+	SingleBookInfo(k, items)
 	screen.addstr("stay ", curses.A_REVERSE)
 	screen.addstr("go back")
 	while True:
@@ -103,19 +110,13 @@ def SingleBook(k, items):
 		if event == ord("q"): break
 		if event == curses.KEY_LEFT:
 			screen.clear()
-			screen.addstr("You pressed a button!\n")
-			screen.addstr("Title: " + items[k].title.encode(code) + "\n")
-			screen.addstr("Author: " + items[k].author.encode(code) + "\n")
-			screen.addstr("Year: " + str(items[k].year) + "\n")
+			SingleBookInfo(k, items)
 			status = "stay"
 			screen.addstr("stay ", curses.A_REVERSE)
 			screen.addstr("go back ")
 		elif event == curses.KEY_RIGHT:
 			screen.clear()
-			screen.addstr("You pressed a button!\n")
-			screen.addstr("Title: " + items[k].title.encode(code) + "\n")
-			screen.addstr("Author: " + items[k].author.encode(code) + "\n")
-			screen.addstr("Year: " + str(items[k].year) + "\n")
+			SingleBookInfo(k, items)
 			status = "return"
 			screen.addstr("stay ")
 			screen.addstr("go back ", curses.A_REVERSE)
