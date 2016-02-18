@@ -41,6 +41,8 @@ def getBooks(sortBy):
 		AllBooks = c.execute("SELECT * FROM books ORDER BY language, author, year")
 	if sortBy == "year":
 		AllBooks = c.execute("SELECT * FROM books ORDER BY year, author, title")
+	if sortBy == "subject":
+		AllBooks = c.execute("SELECT * FROM books ORDER BY subject, author, year")
 	bookObjects = []
 	for entry in AllBooks:
 		bookObjects.append(Book(entry))
@@ -209,6 +211,8 @@ def main(row, page):
 					myBooks = getBooks("country")
 				elif sortOpt == ord("y"):
 					myBooks = getBooks("year")
+				elif sortOpt == ord("s"):
+					myBooks = getBooks("subject")
 			items = paginate(page)
 			screen.clear()
 			Nscreen(row, items)
