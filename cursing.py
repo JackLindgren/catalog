@@ -26,11 +26,20 @@ class PageInfo:
 		self.subj = int((4.0  / 34) * int(columns))
 		self.rows = int(rows)
 
-def getBooks():
+def getBooks(sortBy):
 	# connects to the database, gets all the books, and returns an array of book objects
 	conn = sqlite3.connect("lib_catalog")
 	c = conn.cursor()
-	AllBooks = c.execute("SELECT * FROM books ORDER BY author, year")
+	if sortBy == "author":
+		AllBooks = c.execute("SELECT * FROM books ORDER BY author, year")
+	if sortBy == "title":
+		AllBooks = c.execute("SELECT * FROM books ORDER BY title, author, year")
+	if sortBy == "country":
+		AllBooks = c.execute("SELECT * FROM books ORDER BY country, author, year")
+	if sortBy == "language":
+		AllBooks = c.execute("SELECT * FROM books ORDER BY language, author, year")
+	if sortBy == "year":
+		AllBooks = c.execute("SELECT * FROM books ORDER BY year, author, title")
 	bookObjects = []
 	for entry in AllBooks:
 		bookObjects.append(Book(entry))
@@ -191,7 +200,7 @@ page = 1
 
 screen = curses.initscr()
 
-myBooks = getBooks()
+myBooks = getBooks("author")
 
 items = paginate(page)
 Nscreen(row, items)
