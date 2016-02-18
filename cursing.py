@@ -33,15 +33,15 @@ def getBooks(sortBy):
 	c = conn.cursor()
 	if sortBy == "author":
 		AllBooks = c.execute("SELECT * FROM books ORDER BY author, year")
-	if sortBy == "title":
+	elif sortBy == "title":
 		AllBooks = c.execute("SELECT * FROM books ORDER BY title, author, year")
-	if sortBy == "country":
+	elif sortBy == "country":
 		AllBooks = c.execute("SELECT * FROM books ORDER BY country, author, year")
-	if sortBy == "language":
+	elif sortBy == "language":
 		AllBooks = c.execute("SELECT * FROM books ORDER BY language, author, year")
-	if sortBy == "year":
+	elif sortBy == "year":
 		AllBooks = c.execute("SELECT * FROM books ORDER BY year, author, title")
-	if sortBy == "subject":
+	elif sortBy == "subject":
 		AllBooks = c.execute("SELECT * FROM books ORDER BY subject, author, year")
 	bookObjects = []
 	for entry in AllBooks:
@@ -135,7 +135,6 @@ def SingleBook(k, items):
 		elif event == 10 and status == "return": break
 
 def main(row, page):
-	myBooks = getBooks("title")
 	curses.noecho()
 	curses.curs_set(0)
 	screen.keypad(1)
@@ -201,10 +200,10 @@ def main(row, page):
 			ent = screen.getch()
 			if ent == 10:
 				global myBooks
-				if sortOpt == ord("t"):
-					myBooks = getBooks("title")
-				elif sortOpt == ord("l"):
+				if sortOpt == ord("l"):
 					myBooks = getBooks("language")
+				elif sortOpt == ord("t"):
+					myBooks = getBooks("title")
 				elif sortOpt == ord("a"):
 					myBooks = getBooks("author")
 				elif sortOpt == ord("c"):
