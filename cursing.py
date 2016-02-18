@@ -195,15 +195,20 @@ def main(row, page):
 		elif event == ord(":"):
 			screen.addstr(":")
 			sortOpt = screen.getch()
-			if sortOpt == ord("t"):
-				screen.addstr(chr(sortOpt))
-				myBooks = getBooks("title")
-			sortOpt = screen.getch()
-			# why doesn't screen.getch() work here?
-			# it doesn't seem to pick up anything
-			#screen.addstr(str(sortOpt))
-			#screen.addstr( chr(sortOpt) )
-			curses.noecho()
+			screen.addstr(chr(sortOpt))
+			ent = screen.getch()
+			if ent == 10:
+				global myBooks
+				if sortOpt == ord("t"):
+					myBooks = getBooks("title")
+				elif sortOpt == ord("l"):
+					myBooks = getBooks("language")
+				elif sortOpt == ord("a"):
+					myBooks = getBooks("author")
+				elif sortOpt == ord("c"):
+					myBooks = getBooks("country")
+				elif sortOpt == ord("y"):
+					myBooks = getBooks("year")
 			items = paginate(page)
 			screen.clear()
 			Nscreen(row, items)
