@@ -2,6 +2,7 @@ import curses
 import os
 import sqlite3
 import locale
+import time
 
 locale.setlocale(locale.LC_ALL, "")
 code = locale.getpreferredencoding()
@@ -132,6 +133,7 @@ def SingleBook(k, items):
 		elif event == 10 and status == "return": break
 
 def main(row, page):
+	myBooks = getBooks("title")
 	curses.noecho()
 	curses.curs_set(0)
 	screen.keypad(1)
@@ -190,10 +192,23 @@ def main(row, page):
 			screen.clear()
 			Nscreen(row, items)
 
-		# elif event == 58:
-		# 	screen.addstr(":")
-		# 	curses.echo()
-		# 	opt = raw_input()
+		elif event == ord(":"):
+			screen.addstr(":")
+			sortOpt = screen.getch()
+			if sortOpt == ord("t"):
+				screen.addstr(chr(sortOpt))
+				myBooks = getBooks("title")
+			sortOpt = screen.getch()
+			# why doesn't screen.getch() work here?
+			# it doesn't seem to pick up anything
+			#screen.addstr(str(sortOpt))
+			#screen.addstr( chr(sortOpt) )
+			curses.noecho()
+			items = paginate(page)
+			screen.clear()
+			Nscreen(row, items)
+
+
 
 row = 0
 page = 1
