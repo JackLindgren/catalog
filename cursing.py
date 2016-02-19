@@ -26,6 +26,7 @@ class PageInfo:
 		self.lang = int((4.0  / 34) * int(columns))
 		self.subj = int((4.0  / 34) * int(columns))
 		self.rows = int(rows)
+		self.cols = int(columns)
 
 def getBooks(sortBy):
 	# connects to the database, gets all the books, and returns an array of book objects
@@ -89,7 +90,8 @@ def topLabel():
 def Nscreen(n, pageItems):
 	# writes the current screen - really just moves the cursor up and down
 	# pageItems is an array with the current page's items (take from the main array)
-	screen.addstr("Back\n")
+	format = PageInfo()
+	screen.addstr(sortBy.center(format.cols))
 	label = topLabel()
 	screen.addstr(label, curses.A_BOLD | curses.A_REVERSE)
 	i = 0
@@ -200,18 +202,25 @@ def main(row, page):
 			ent = screen.getch()
 			if ent == 10:
 				global myBooks
+				global sortBy
 				if sortOpt == ord("l"):
 					myBooks = getBooks("language")
+					sortBy = "LANGUAGE"
 				elif sortOpt == ord("t"):
 					myBooks = getBooks("title")
+					sortBy = "TITLE"
 				elif sortOpt == ord("a"):
 					myBooks = getBooks("author")
+					sortBy = "AUTHOR"
 				elif sortOpt == ord("c"):
 					myBooks = getBooks("country")
+					sortBy = "COUNTRY"
 				elif sortOpt == ord("y"):
 					myBooks = getBooks("year")
+					sortBy = "YEAR"
 				elif sortOpt == ord("s"):
 					myBooks = getBooks("subject")
+					sortBy = "SUBJECT"
 			items = paginate(page)
 			screen.clear()
 			Nscreen(row, items)
@@ -224,6 +233,7 @@ page = 1
 screen = curses.initscr()
 
 myBooks = getBooks("author")
+sortBy = "AUTHOR"
 
 items = paginate(page)
 Nscreen(row, items)
