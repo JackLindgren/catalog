@@ -186,6 +186,8 @@ def main(row, page):
 			screen.clear()
 			page = page + 1
 			items = paginate(page)
+			if lastPage(page) == True and row > len(items) - 1:
+				row = len(items) - 1
 			Nscreen(row, items)
 
 		elif event == 10:
