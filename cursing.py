@@ -101,7 +101,7 @@ def Nscreen(n, pageItems):
 		else:
 			screen.addstr(rowFormat(pageItems[i]).encode(code))
 		i = i + 1
-	screen.addstr("Next\n")
+	#screen.addstr("Next\n")
 
 def SingleBookInfo(k, items):
 	screen.addstr("You pressed a button!\n")
@@ -135,6 +135,35 @@ def SingleBook(k, items):
 			screen.addstr("stay ")
 			screen.addstr("go back ", curses.A_REVERSE)
 		elif event == 10 and status == "return": break
+
+def statScreen():
+	screen.clear()
+	row = 0
+	statCategories = ["author\n", "country\n", "language\n", "subject\n"]
+	screen.addstr("stat screen\n")
+	drawStats(row, statCategories)
+	while True:
+		event = screen.getch()
+		if event == ord("q"): break
+		elif event == curses.KEY_DOWN and row != len(statCategories) - 1:
+			screen.clear()
+			row = row + 1
+			drawStats(row, statCategories)
+		elif event == curses.KEY_UP and row != 0:
+			screen.clear()
+			row = row - 1
+			drawStats(row, statCategories)
+
+def drawStats(n, categories):
+	screen.clear()
+	screen.addstr("this is the stats screen\n")
+	i = 0
+	while i < len(categories):
+		if i == n:
+			screen.addstr(categories[i], curses.A_REVERSE)
+		else:
+			screen.addstr(categories[i])
+		i += 1
 
 def main(row, page):
 	curses.noecho()
@@ -223,6 +252,8 @@ def main(row, page):
 				elif sortOpt == ord("s"):
 					myBooks = getBooks("subject")
 					sortBy = "SUBJECT"
+				elif sortOpt == ord("i"):
+					statScreen()
 			items = paginate(page)
 			screen.clear()
 			Nscreen(row, items)
