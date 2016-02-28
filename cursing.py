@@ -153,6 +153,27 @@ def statScreen():
 			screen.clear()
 			row = row - 1
 			drawStats(row, statCategories)
+		elif event == 10:
+			showStats(statCategories[row])
+			drawStats(row, statCategories)
+
+def showStats(category):
+	screen.clear()
+	conn = sqlite3.connect("lib_catalog")
+	c = conn.cursor()
+	statItems = c.execute("SELECT {0}, COUNT({0}) FROM books GROUP BY {0} ORDER BY COUNT(*) DESC LIMIT 10;".format(category))
+	screen.addstr("here are stats for {0}".format(category))
+	tops = []
+	for k in statItems:
+		tops.append(k)
+	for i in tops:
+		screen.addstr(i[0].encode(code) + "  " + str(i[1]) + "\n" )
+
+	#for item in statItems:
+	#	screen.addstr(item + "\n")
+	while True:
+		event = screen.getch()
+		if event == ord("q"): break
 
 def drawStats(n, categories):
 	screen.clear()
