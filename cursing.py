@@ -167,7 +167,9 @@ def showStats(category):
 	for k in statItems:
 		tops.append(k)
 	for i in tops:
-		screen.addstr(i[0].encode(code) + "  " + str(i[1]) + "\n" )
+		show = i[0].encode(code).ljust(0) + str(i[1]).rjust(15, ".") + "\n"
+		screen.addstr(show)
+		#screen.addstr(i[0].encode(code).ljust(0) + str(i[1]).rjust(15, ".") + "\n" )
 
 	#for item in statItems:
 	#	screen.addstr(item + "\n")
