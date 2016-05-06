@@ -252,7 +252,9 @@ def main(row, page):
 		elif event == ord(":"):
 			screen.addstr(":")
 			sortOpt = screen.getch()
-			screen.addstr(chr(sortOpt))
+			try: screen.addstr(chr(sortOpt))
+			except ValueError:
+				screen.addstr(" ")
 			ent = screen.getch()
 			if ent == 10:
 				global myBooks
